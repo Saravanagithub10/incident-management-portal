@@ -1,42 +1,57 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { sql, getPool } = require('../config/database');
 
-const users = [];
-
+// ===========================
+// REGISTER USER
+// ===========================
 const registerUser = async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
 
-    const existingUser = users.find(
-      user => user.email === email
-    );
+    const pool = await getPool();
 
-    if (existingUser) {
+    // Check if user already exists
+    const result = await pool.request()
+      .input('Email', sql.NVarChar, email)
+      .query(`
+        SELECT *
+        FROM Users
+        WHERE Email = @Email
+      `);
+
+    if (result.recordset.length > 0) {
       return res.status(400).json({
         message: 'User already exists'
       });
     }
 
+    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const newUser = {
-      id: users.length + 1,
-      name,
-      email,
-      password: hashedPassword,
-      role
-    };
+    // Insert user
+    const insertResult = await pool.request()
+      .input('Name', sql.NVarChar, name)
+      .input('Email', sql.NVarChar, email)
+      .input('Password', sql.NVarChar, hashedPassword)
+      .input('Role', sql.NVarChar, role)
+      .query(`
+        INSERT INTO Users
+        (Name, Email, Password, Role)
 
-    users.push(newUser);
+        OUTPUT
+          INSERTED.Id,
+          INSERTED.Name,
+          INSERTED.Email,
+          INSERTED.Role
+
+        VALUES
+        (@Name, @Email, @Password, @Role)
+      `);
 
     res.status(201).json({
       message: 'User registered successfully',
-      user: {
-        id: newUser.id,
-        name: newUser.name,
-        email: newUser.email,
-        role: newUser.role
-      }
+      user: insertResult.recordset[0]
     });
 
   } catch (error) {
@@ -46,13 +61,25 @@ const registerUser = async (req, res) => {
   }
 };
 
+// ===========================
+// LOGIN USER
+// ===========================
 const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const user = users.find(
-      user => user.email === email
-    );
+    const pool = await getPool();
+
+    // Find user
+    const result = await pool.request()
+      .input('Email', sql.NVarChar, email)
+      .query(`
+        SELECT *
+        FROM Users
+        WHERE Email = @Email
+      `);
+
+    const user = result.recordset[0];
 
     if (!user) {
       return res.status(404).json({
@@ -60,9 +87,10 @@ const loginUser = async (req, res) => {
       });
     }
 
+    // Compare password
     const isPasswordValid = await bcrypt.compare(
       password,
-      user.password
+      user.Password
     );
 
     if (!isPasswordValid) {
@@ -71,23 +99,18 @@ const loginUser = async (req, res) => {
       });
     }
 
+    // Generate JWT
     const token = jwt.sign(
       {
-        id: user.id,
-        email: user.email,
-        role: user.role
+        id: user.Id,
+        email: user.Email,
+        role: user.Role
       },
       process.env.JWT_SECRET,
       {
         expiresIn: '1h'
       }
     );
-    const getProfile = (req, res) => {
-  res.status(200).json({
-    message: 'Profile fetched successfully',
-    user: req.user
-  });
-};
 
     res.status(200).json({
       message: 'Login successful',
@@ -101,11 +124,43 @@ const loginUser = async (req, res) => {
   }
 };
 
-const getProfile = (req, res) => {
-  res.status(200).json({
-    message: 'Profile fetched successfully',
-    user: req.user
-  });
+// ===========================
+// GET PROFILE
+// ===========================
+const getProfile = async (req, res) => {
+  try {
+    const pool = await getPool();
+
+    const result = await pool.request()
+      .input('Id', sql.Int, req.user.id)
+      .query(`
+        SELECT
+          Id,
+          Name,
+          Email,
+          Role
+        FROM Users
+        WHERE Id = @Id
+      `);
+
+    const user = result.recordset[0];
+
+    if (!user) {
+      return res.status(404).json({
+        message: 'User not found'
+      });
+    }
+
+    res.status(200).json({
+      message: 'Profile fetched successfully',
+      user
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      message: error.message
+    });
+  }
 };
 
 module.exports = {

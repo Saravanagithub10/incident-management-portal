@@ -12,33 +12,14 @@ const {
   deleteIncident
 } = require('../controllers/incidentController');
 
-router.post(
-  '/',
-  authMiddleware,
-  createIncident
-);
+router.post('/', authMiddleware, createIncident);
 
-router.get(
-  '/',
-  authMiddleware,
-  getAllIncidents
-);
-router.get(
-  '/:id',
-  authMiddleware,
-  getIncidentById
-);
+router.get('/', authMiddleware, getAllIncidents);
 
-router.put(
-  '/:id',
-  authMiddleware,
-  updateIncident
-);
+router.get('/:id', authMiddleware, getIncidentById);
 
-router.delete(
-  '/:id',
-  authMiddleware,
-  deleteIncident
-);
+router.put('/:id', authMiddleware, updateIncident);
+
+router.delete('/:id', authMiddleware, deleteIncident);
 
 module.exports = router;
