@@ -3,6 +3,35 @@ const incidents = [];
 const createIncident = (req, res) => {
   try {
     const { title, description, priority } = req.body;
+    const errors = [];
+
+if (!title || title.trim() === '') {
+  errors.push('Title is required');
+}
+
+if (!description || description.trim() === '') {
+  errors.push('Description is required');
+}
+
+const validPriorities = [
+  'Low',
+  'Medium',
+  'High',
+  'Critical'
+];
+
+if (!validPriorities.includes(priority)) {
+  errors.push(
+    'Priority must be Low, Medium, High or Critical'
+  );
+}
+
+if (errors.length > 0) {
+  return res.status(400).json({
+    message: 'Validation failed',
+    errors
+  });
+}
 
     const incident = {
       id: incidents.length + 1,
@@ -73,6 +102,46 @@ const updateIncident = (req, res) => {
   }
 
   const { title, description, priority, status } = req.body;
+  const errors = [];
+
+const validPriorities = [
+  'Low',
+  'Medium',
+  'High',
+  'Critical'
+];
+
+const validStatuses = [
+  'Open',
+  'In Progress',
+  'Resolved',
+  'Closed'
+];
+
+if (
+  priority &&
+  !validPriorities.includes(priority)
+) {
+  errors.push(
+    'Priority must be Low, Medium, High or Critical'
+  );
+}
+
+if (
+  status &&
+  !validStatuses.includes(status)
+) {
+  errors.push(
+    'Status must be Open, In Progress, Resolved or Closed'
+  );
+}
+
+if (errors.length > 0) {
+  return res.status(400).json({
+    message: 'Validation failed',
+    errors
+  });
+}
 
   incident.title = title || incident.title;
   incident.description = description || incident.description;
