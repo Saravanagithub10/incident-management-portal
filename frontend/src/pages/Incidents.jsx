@@ -162,11 +162,12 @@ function Incidents() {
 
                 <td>
 
-                  <button
-                    className="btn btn-warning btn-sm me-2"
-                  >
-                    ✏️ Edit
-                  </button>
+                 <Link
+  to={`/incidents/edit/${incident.Id}`}
+  className="btn btn-warning btn-sm me-2"
+>
+  ✏️ Edit
+</Link>
 
                   <button
   className="btn btn-danger btn-sm"
