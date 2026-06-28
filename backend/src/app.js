@@ -1,10 +1,11 @@
 const express = require('express');
 const cors = require('cors');
-const incidentRoutes = require('./routes/incidentRoutes');
-const errorMiddleware = require('./middleware/errorMiddleware');
-const dashboardRoutes = require("./routes/dashboardRoutes");
 
 const authRoutes = require('./routes/authRoutes');
+const incidentRoutes = require('./routes/incidentRoutes');
+const dashboardRoutes = require('./routes/dashboardRoutes');
+
+const errorMiddleware = require('./middleware/errorMiddleware');
 
 const app = express();
 
@@ -19,7 +20,9 @@ app.get('/', (req, res) => {
 
 app.use('/api/auth', authRoutes);
 app.use('/api/incidents', incidentRoutes);
+app.use('/api/dashboard', dashboardRoutes);
+
+// ✅ Error middleware must always be LAST
 app.use(errorMiddleware);
-app.use("/api/dashboard", dashboardRoutes);
 
 module.exports = app;
