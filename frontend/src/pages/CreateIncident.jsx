@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import MainLayout from "../layouts/MainLayout";
 import api from "../services/api";
+import { toast } from "react-toastify";
 
 function CreateIncident() {
 
@@ -40,18 +41,17 @@ function CreateIncident() {
         }
       );
 
-      alert("Incident created successfully");
-
+toast.success("Incident created successfully");
       navigate("/incidents");
 
     } catch (error) {
 
       console.log(error);
 
-      alert(
-        error.response?.data?.message ||
-        "Failed to create incident"
-      );
+     toast.error(
+  error.response?.data?.message ||
+  "Failed to create incident"
+);
 
     }
 

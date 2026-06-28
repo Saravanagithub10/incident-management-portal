@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import MainLayout from "../layouts/MainLayout";
+import { toast } from "react-toastify";
 import api from "../services/api";
 
 function Incidents() {
@@ -8,26 +9,37 @@ function Incidents() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [priorityFilter, setPriorityFilter] = useState("");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchIncidents();
   }, []);
 
   const fetchIncidents = async () => {
-    try {
-      const token = localStorage.getItem("token");
+  try {
 
-      const response = await api.get("/incidents", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+    setLoading(true);
 
-      setIncidents(response.data.incidents);
-    } catch (error) {
-      console.log(error);
-    }
-  };
+    const token = localStorage.getItem("token");
+
+    const response = await api.get("/incidents", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    setIncidents(response.data.incidents);
+
+  } catch (error) {
+
+    console.log(error);
+
+  } finally {
+
+    setLoading(false);
+
+  }
+};
 
   const deleteIncident = async (id) => {
     const confirmDelete = window.confirm(
@@ -45,13 +57,15 @@ function Incidents() {
         },
       });
 
-      alert("Incident deleted successfully");
-
+toast.success("Incident deleted successfully");
       fetchIncidents();
     } catch (error) {
       console.log(error);
 
-      alert(error.response?.data?.message || "Delete failed");
+      toast.error(
+  error.response?.data?.message ||
+  "Delete failed"
+);
     }
   };
 
@@ -161,7 +175,28 @@ function Incidents() {
 
 </div>
 
-      <table className="table table-bordered table-hover align-middle">
+     {loading ? (
+
+  <div className="text-center mt-5">
+
+    <div
+      className="spinner-border text-primary"
+      role="status"
+    >
+      <span className="visually-hidden">
+        Loading...
+      </span>
+    </div>
+
+    <p className="mt-3">
+      Loading incidents...
+    </p>
+
+  </div>
+
+) : (
+
+   <table className="table table-bordered table-hover align-middle">
         <thead className="table-dark">
           <tr>
             <th>Title</th>
@@ -241,13 +276,42 @@ function Incidents() {
             ))
           ) : (
             <tr>
-              <td colSpan="5" className="text-center text-muted">
-                No incidents found.
-              </td>
-            </tr>
+  <td colSpan="5" className="text-center py-5">
+
+    <div className="d-flex flex-column align-items-center">
+
+      <div
+        style={{
+          fontSize: "60px"
+        }}
+      >
+        📂
+      </div>
+
+      <h4 className="mt-3">
+        No Incidents Found
+      </h4>
+
+      <p className="text-muted">
+        Create your first incident to get started.
+      </p>
+
+      <Link
+        to="/incidents/create"
+        className="btn btn-primary"
+      >
+        + Create Incident
+      </Link>
+
+    </div>
+
+  </td>
+</tr>
           )}
         </tbody>
       </table>
+
+)}
     </MainLayout>
   );
 }

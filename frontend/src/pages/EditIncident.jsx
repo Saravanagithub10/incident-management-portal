@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import MainLayout from "../layouts/MainLayout";
+import { toast } from "react-toastify";
 import api from "../services/api";
 
 function EditIncident() {
@@ -76,18 +77,17 @@ function EditIncident() {
         }
       );
 
-      alert("Incident updated successfully");
-
+toast.success("Incident updated successfully");
       navigate("/incidents");
 
     } catch (error) {
 
       console.log(error);
 
-      alert(
-        error.response?.data?.message ||
-        "Update failed"
-      );
+      toast.error(
+  error.response?.data?.message ||
+  "Update failed"
+);
 
     }
 
