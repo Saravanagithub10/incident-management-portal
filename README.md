@@ -164,32 +164,6 @@ Azure SQL Database
 
 ---
 
-# 📸 Screenshots
-
-## Login Page
-
-(Add Screenshot)
-
----
-
-## Dashboard
-
-(Add Screenshot)
-
----
-
-## Incidents Page
-
-(Add Screenshot)
-
----
-
-## Azure Deployment
-
-(Add Screenshot)
-
----
-
 # ⚙️ Local Setup
 
 ## Clone Repository
@@ -235,7 +209,7 @@ GitHub:
 https://github.com/Saravanagithub10
 
 LinkedIn:
-(Add LinkedIn Profile)
+https://www.linkedin.com/in/saravanankannan31/
 
 ---
 
